@@ -1,0 +1,34 @@
+{
+  "case_selection_core": "approval-core-v2-20260930",
+  "design": "13 variants in five mechanism families; three old targets and ten authored after core freeze",
+  "independence": "Author-constructed assessment following the case-selection core freeze",
+  "included": [
+    {"variant":"intake_only","field":"answer","family":"binding_omission","old_target":true,"witness":["request_a","edit_b","complete_a_pos","activate"],"expected":"unqualified_admission","change":"Historical intake-only design has no activation-time binding recheck"},
+    {"variant":"callback_regression","field":"answer","family":"refusal_approval","old_target":true,"witness":["request_a","edit_b","request_b","complete_b_pos","complete_a_pos"],"expected":"approval_preservation","change":"Historical stale-response branch clears independent approval and returns false"},
+    {"variant":"epoch_rebinding","field":"answer","family":"origin_rebinding","old_target":true,"witness":["request_a","revoke","complete_a_pos","activate"],"expected":"unqualified_admission","change":"Replace captured epoch with current epoch before response persistence"},
+    {"variant":"callback_lies_applied","field":"answer","family":"refusal_approval","old_target":false,"witness":["request_a","edit_b","request_b","complete_b_pos","complete_a_pos"],"expected":"approval_preservation","change":"Same stale-write effect, but report APPLIED"},
+    {"variant":"refusal_origin_clear","field":"answer","family":"refusal_approval","old_target":false,"witness":["request_a","edit_b","request_b","complete_b_pos","complete_a_pos"],"expected":"approval_preservation","change":"On obsolete content response, clear persisted packet identity only"},
+    {"variant":"refusal_state_write","field":"answer","family":"refusal_lifecycle","old_target":false,"witness":["request_a","edit_b","request_b","complete_b_pos","complete_a_pos"],"expected":"refusal_state_preservation","change":"Obsolete completion changes pending approved object to suspended"},
+    {"variant":"content_rebinding","field":"answer","family":"origin_rebinding","old_target":false,"witness":["request_a","edit_b","complete_a_pos","activate"],"expected":"unqualified_admission","change":"Persist old receipt using a copy of current content with the captured epoch"},
+    {"variant":"evidence_omitted","field":"evidence","family":"binding_omission","old_target":false,"witness":["request_a","edit_b","complete_a_pos","activate"],"expected":"unqualified_admission","change":"Refresh only evidence fields in the captured copy, simulating omitted evidence binding"},
+    {"variant":"source_omitted","field":"source","family":"binding_omission","old_target":false,"witness":["request_a","edit_b","complete_a_pos","activate"],"expected":"unqualified_admission","change":"Refresh only captured book identity, simulating omitted source identity"},
+    {"variant":"question_omitted","field":"question","family":"binding_omission","old_target":false,"witness":["request_a","edit_b","complete_a_pos","activate"],"expected":"unqualified_admission","change":"Refresh only captured question field, simulating omitted question binding"},
+    {"variant":"suspended_negative_write","field":"answer","family":"completion_state","old_target":false,"witness":["request_a","complete_a_pos","suspend","complete_a_neg"],"expected":"approval_preservation","change":"Allow completion on a suspended record despite pending-only policy"},
+    {"variant":"active_refusal_downgrade","field":"answer","family":"refusal_lifecycle","old_target":false,"witness":["request_a","complete_a_pos","activate","complete_a_pos"],"expected":"refusal_state_preservation","change":"Refused completion on an active record downgrades status to pending"},
+    {"variant":"suspended_refusal_clear","field":"answer","family":"refusal_approval","old_target":false,"witness":["request_a","complete_a_pos","suspend","complete_a_pos"],"expected":"approval_preservation","change":"Refused completion on a suspended record marks approval stale"},
+    {"variant":"digest_control","field":"answer","family":"control","seeds":10},
+    {"variant":"snapshot_control","field":"answer","family":"control","seeds":10},
+    {"variant":"digest_control","field":"evidence","family":"control","seeds":10},
+    {"variant":"snapshot_control","field":"evidence","family":"control","seeds":10},
+    {"variant":"digest_control","field":"source","family":"control","seeds":10},
+    {"variant":"snapshot_control","field":"source","family":"control","seeds":10},
+    {"variant":"digest_control","field":"question","family":"control","seeds":10},
+    {"variant":"snapshot_control","field":"question","family":"control","seeds":10}
+  ],
+  "excluded": [
+    {"candidate":"missing publication purpose","reason":"The card adapter declares one purpose; purpose isolation is assessed in the separate native LangGraph experiment"},
+    {"candidate":"crash midway through multi-table commit","reason":"Crash recovery requires a separate file-backed experiment; this suite executes serial in-memory transitions"}
+  ],
+  "field_change_boundary":"Answer/question edits use the public text-edit API. Evidence/source replacement uses that invalidation plus a named synthetic storage change; all generators and controls receive the same mapping.",
+  "inclusion_rule":"Executable and independently witnessed contract difference. A generator miss cannot exclude a variant. Field omissions are grouped in one family."
+}
